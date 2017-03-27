@@ -64,11 +64,3 @@ do
 
 done
 exit 0;
-
-
-
-
-
-
-done
-exit 0;
