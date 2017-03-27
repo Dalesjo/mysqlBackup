@@ -1,0 +1,74 @@
+#!/bin/bash
+
+while getopts 'd:h:u:p:' flag; do
+  case "${flag}" in
+    d) DBBACKUPDIR="${OPTARG}" ;;
+    h) DBHOST="${OPTARG}" ;;
+    u) DBUSER="${OPTARG}" ;;
+    p) DBPASSWORD="${OPTARG}" ;;
+  esac
+done
+DBBACKUPDATE=`date +"%Y-%m-%d"`;
+
+if [ -z $DBBACKUPDIR ] || [ -z $DBHOST ] || [ -z $DBUSER ] || [ -z $DBPASSWORD ] ; then
+	echo "mysqlBackup [OPTIONS...]"
+	echo "";
+	echo "Backup a remote mysql server."
+	echo "";
+	echo "Flags:";
+	echo "  -d    Directory you want your backups to be saved in"
+	echo "  -h    IP Address or hostname to your pfsense"
+	echo "  -u    username to your mysql"
+	echo "  -p    password to your mysql"
+	echo "";
+	echo "Example:";
+	echo "mysqlBackup -d /var/backup/mysql/ -h 192.168.0.2 -u root -p mypassword"
+	exit 1;
+fi;
+
+if [ ! -d "$DBBACKUPDIR" ] && [ ! -w "$DBBACKUPDIR" ] ; then
+  echo "$DBBACKUPDIR does not exist or is not writable by this user $USER" ;
+  exit 2;
+fi;
+
+if ! hash mysqldump 2>/dev/null; then
+  echo "mysqldump is required, plase install, for centos 7 run 'yum install mysql -y'"
+  exit 3;
+fi
+
+# Getting Backup
+cd $DBBACKUPDIR;
+umask 0027;
+
+for db in $(echo "show databases;" | mysql --host=${DBHOST} --user=${DBUSER} --password=${DBPASSWORD} -N);
+do
+
+  if [ ! -d $db ] ; then
+    mkdir $db;
+  fi;
+
+  if cd $db; then
+      mysqldump --compress --single-transaction --host=${DBHOST} --user=${DBUSER} --password=${DBPASSWORD} ${db} | bzip2 -9 >${db}_${DBBACKUPDATE}.sql.bz2
+      if [ $? -eq 0 ] && [ -f ${db}_${DBBACKUPDATE}.sql.bz2 ]; then
+    		echo "Backup of Database ${db} Ok";
+    	else
+    		(>&2 echo "Backup of Database ${db} Failed");
+    	fi
+
+      md5sum ${db}_${DBBACKUPDATE}.sql.bz2 >> ${db}_checksums.md5
+      cd ..
+  else
+    (>&2 echo "Backup directory Database ${db} could not be created");
+    exit 4;
+  fi;
+
+done
+exit 0;
+
+
+
+
+
+
+done
+exit 0;
