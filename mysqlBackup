@@ -8,7 +8,7 @@ while getopts 'd:h:u:p:' flag; do
     p) DBPASSWORD="${OPTARG}" ;;
   esac
 done
-DBBACKUPDATE=`date +"%Y-%m-%d"`;
+DBBACKUPDATE=`date +%Y%m%d-%H%M%S`;
 
 if [ -z $DBBACKUPDIR ] || [ -z $DBHOST ] || [ -z $DBUSER ] || [ -z $DBPASSWORD ] ; then
 	echo "mysqlBackup [OPTIONS...]"
