@@ -48,7 +48,7 @@ do
   fi;
 
   if cd $db; then
-      mysqldump --compress --single-transaction --host=${DBHOST} --user=${DBUSER} --password=${DBPASSWORD} ${db} | bzip2 -9 >${db}_${DBBACKUPDATE}.sql.bz2
+      mysqldump --compress --single-transaction --routines --host=${DBHOST} --user=${DBUSER} --password=${DBPASSWORD} ${db} | bzip2 -9 >${db}_${DBBACKUPDATE}.sql.bz2
       if [ $? -eq 0 ] && [ -f ${db}_${DBBACKUPDATE}.sql.bz2 ]; then
     		echo "Backup of Database ${db} Ok";
     	else
