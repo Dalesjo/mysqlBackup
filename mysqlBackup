@@ -32,7 +32,12 @@ if [ ! -d "$DBBACKUPDIR" ] && [ ! -w "$DBBACKUPDIR" ] ; then
 fi;
 
 if ! hash mysqldump 2>/dev/null; then
-  echo "mysqldump is required, plase install, for centos 7 run 'yum install mysql -y'"
+  echo "mysqldump is required, please install, for centos 7 run 'yum install mysql -y'"
+  exit 3;
+fi
+
+if ! hash bzip2 2>/dev/null; then
+  echo "bzip2 is required, please install, for centos 7 run 'yum install bzip2 -y'"
   exit 3;
 fi
 
